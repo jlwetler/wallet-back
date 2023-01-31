@@ -5,9 +5,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start:prod": "node src/server.js",
-    "start:test": "NODE_ENV='test' node .src/server.js",
-    "test": "set $NODE_ENV=test&& npx jest"
+    "start": "set NODE_ENV=prod&& npx nodemon src/server.js",
+    "test": "set NODE_ENV=test&& npx jest"
   },
   "keywords": [],
   "author": "",

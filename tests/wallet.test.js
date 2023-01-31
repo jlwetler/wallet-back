@@ -1,7 +1,7 @@
-/*import app from '../src/app.js';
+import app from '../src/app.js';
 import supertest from 'supertest';
 import connection from '../src/database.js';
-import setup from './setup';
+import '../src/setup.js';
 
 beforeEach(async () => {
     await connection.query(`DELETE FROM banco_da_aplicação`);
@@ -22,5 +22,5 @@ describe("POST /test", ()=> {
 
 afterAll(() => {
     connection.end();
-  });*/
+  });
   
