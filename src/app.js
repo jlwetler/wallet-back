@@ -68,7 +68,6 @@ app.post('/login', async (req, res) => {
                 ON users.id = authentication."userId"
                 WHERE users.id = $1
             `, [id]);
-            console.log(session.rows[0]);
             res.send(session.rows[0]);
         } else {
             res.sendStatus(401);
@@ -80,7 +79,30 @@ app.post('/login', async (req, res) => {
 });
 
 app.get('/transactions', async (req, res) => {
+    try {
+        const authorization = req.header("Authorization");
+        const token = authorization?.replace("Bearer ", "");
+    
+        const validateToken = await connection.query(`
+            SELECT * FROM users
+            JOIN authentication ON authentication."userId" = users.id
+            WHERE authentication.token = $1
+        `, [token]);
+            
+        if(validateToken.rows.length === 0) return res.sendStatus(401);
 
+        const id = validateToken.rows[0].userId;
+
+        const result = await connection.query(`
+            SELECT * FROM transactions 
+            WHERE "userId" = $1
+            ORDER BY date ASC, id ASC
+        `, [id]);
+        res.send(result.rows).status(200);
+
+    } catch {
+        res.sendStatus(500);
+    }
 })
 
 app.post('/transactions', async (req, res) => {
@@ -110,7 +132,7 @@ app.post('/transactions', async (req, res) => {
             INSERT INTO transactions (value, description, "moneyEntry", date, "userId")
             VALUES ($1, $2, $3, $4, $5)
         `,[value, description, moneyEntry, date, userId]);
-        console.log(token);
+
         res.sendStatus(201);
     
     } catch {
@@ -118,7 +140,33 @@ app.post('/transactions', async (req, res) => {
     }
 });
 
+app.delete('/transactions/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const authorization = req.header("Authorization");
+        const token = authorization?.replace("Bearer ", "");
+    
+        const validateToken = await connection.query(`
+            SELECT * FROM users
+            JOIN authentication ON authentication."userId" = users.id
+            WHERE authentication.token = $1
+        `, [token]);
+            
+        if(validateToken.rows.length === 0) return res.sendStatus(401);
 
-app.listen(4000, () => {
-    console.log("Server running on port 4000");
+        await connection.query(`
+            DELETE FROM transactions
+            WHERE id = $1
+        `,[id])
+        res.sendStatus(200);
+
+    } catch {
+        res.sendStatus(500);
+    }
+});
+
+app.post('/test', (req,res) => {
+    res.sendStatus(200);
 })
+
+export default app;
