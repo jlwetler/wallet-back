@@ -16,11 +16,5 @@ const connection = new Pool({
     port: parseInt(process.env.DB_PORT),
     database: process.env.DB_NAME,
 });
-/*
-DB_USER=postgres
-DB_PASS=senha1234
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=wallet
-*/
+
 export default connection;

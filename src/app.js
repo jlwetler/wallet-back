@@ -1,10 +1,11 @@
 import express from 'express';
 import cors from 'cors';
-import connection from './database/database.js';
+import { login } from './controllers/userController.js';
 import bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
 import BaseJoi from 'joi';
 import JoiDate from '@joi/date';
+import connection from './database/database.js';
 
 const app = express();
 app.use(cors());
@@ -44,39 +45,7 @@ app.post('/sign-up', async (req, res) => {
     }
 });
 
-app.post('/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-
-        const result = await connection.query(`
-            SELECT * FROM users WHERE email = $1
-        `, [email]);
-
-        const user = result.rows[0];
-
-        if(user && bcrypt.compareSync(password, user.password)) {
-            const id = user.id;
-            const token = uuid();
-            await connection.query(`
-                INSERT INTO authentication (token, "userId")
-                VALUES ($1, $2)            
-            `,[token, id]);
-
-            const session = await connection.query(`
-                SELECT users.id, users.name, users.email, authentication.token
-                FROM users JOIN authentication
-                ON users.id = authentication."userId"
-                WHERE users.id = $1
-            `, [id]);
-            res.send(session.rows[0]);
-        } else {
-            res.sendStatus(401);
-        }
-    } catch(e){
-        console.log(e)
-        res.sendStatus(500);
-    }
-});
+app.post('/login', login);
 
 app.get('/transactions', async (req, res) => {
     try {

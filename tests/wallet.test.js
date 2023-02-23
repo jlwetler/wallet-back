@@ -4,7 +4,7 @@ import connection from '../src/database.js';
 import '../src/setup.js';
 
 beforeEach(async () => {
-    await connection.query(`DELETE FROM banco_da_aplicação`);
+    await connection.query(`DELETE FROM wallet_tests`);
   });
   
 
