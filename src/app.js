@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { login } from './controllers/userController.js';
 import { signUp } from './controllers/signUpController.js';
-import { getTransactions } from './controllers/transactionsController.js';
+import { getTransactions, insertTransaction } from './controllers/transactionsController.js';
 import bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
 import BaseJoi from 'joi';
@@ -19,41 +19,7 @@ app.post('/login', login);
 
 app.get('/transactions', getTransactions)
 
-app.post('/transactions', async (req, res) => {
-    try {
-        const joi = BaseJoi.extend(JoiDate);
-        const transactionSchema = joi.object({
-            value: joi.number().min(1).required(), 
-            description: joi.string().min(3).max(30).required(),
-            moneyEntry: joi.boolean().required(),
-            date: joi.date().format('YYYY-MM-DD').required(),
-            userId: joi.number().min(1).required()
-        })
-        const object = await transactionSchema.validateAsync(req.body);
-        const { value, description, moneyEntry, date, userId } = object;
-
-        const authorization = req.header("Authorization");
-        const token = authorization?.replace("Bearer ", "");
-  
-        const validateToken = await connection.query(`
-            SELECT * FROM users
-            JOIN authentication ON authentication."userId" = users.id
-            WHERE authentication.token = $1
-        `, [token]);
-        
-        if(validateToken.rows.length === 0) return res.sendStatus(401);
-        
-        await connection.query(`
-            INSERT INTO transactions (value, description, "moneyEntry", date, "userId")
-            VALUES ($1, $2, $3, $4, $5)
-        `,[value, description, moneyEntry, date, userId]);
-
-        res.sendStatus(201);
-    
-    } catch {
-        res.sendStatus(500);
-    }
-});
+app.post('/transactions', insertTransaction)
 
 app.delete('/transactions/:id', async (req, res) => {
     try {

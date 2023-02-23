@@ -1,5 +1,7 @@
 import { validate } from "../services/userService.js";
 import { getAllTransactions } from "../repositories/getTransactionsRepository.js";
+import { postTransaction } from "../repositories/insertTransactionRepository.js";
+import { transactionSchema } from "../schemas/transactionSchema.js";
 
 export async function getTransactions(req, res) {
     try {
@@ -18,3 +20,22 @@ export async function getTransactions(req, res) {
     }
 }
 
+export async function insertTransaction(req, res) {
+    try {
+        const transactionObject = await transactionSchema(req.body);
+
+        const authorization = req.header("Authorization");
+        
+        const userId = await validate(authorization);
+
+        if(userId === null) return res.sendStatus(401);
+        
+        await postTransaction(transactionObject, userId)
+
+        res.sendStatus(201);
+    
+    } catch(e) {
+        console.log(e);
+        res.sendStatus(500);
+    }
+}
