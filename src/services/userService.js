@@ -16,3 +16,11 @@ export async function authenticate(user, password) {
     }
 }
 
+export async function validate(authorization) {
+    const token = authorization?.replace("Bearer ", "");
+    const userId = await validateToken(token);
+
+    if(userId === null) return null;
+
+    return userId;
+}
