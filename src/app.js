@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { login } from './controllers/userController.js';
 import { signUp } from './controllers/signUpController.js';
+import { getTransactions } from './controllers/transactionsController.js';
 import bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
 import BaseJoi from 'joi';
@@ -12,41 +13,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const joi = BaseJoi.extend(JoiDate);
-
 app.post('/sign-up', signUp);
 
 app.post('/login', login);
 
-app.get('/transactions', async (req, res) => {
-    try {
-        const authorization = req.header("Authorization");
-        const token = authorization?.replace("Bearer ", "");
-    
-        const validateToken = await connection.query(`
-            SELECT * FROM users
-            JOIN authentication ON authentication."userId" = users.id
-            WHERE authentication.token = $1
-        `, [token]);
-            
-        if(validateToken.rows.length === 0) return res.sendStatus(401);
-
-        const id = validateToken.rows[0].userId;
-
-        const result = await connection.query(`
-            SELECT * FROM transactions 
-            WHERE "userId" = $1
-            ORDER BY date ASC, id ASC
-        `, [id]);
-        res.send(result.rows).status(200);
-
-    } catch {
-        res.sendStatus(500);
-    }
-})
+app.get('/transactions', getTransactions)
 
 app.post('/transactions', async (req, res) => {
     try {
+        const joi = BaseJoi.extend(JoiDate);
         const transactionSchema = joi.object({
             value: joi.number().min(1).required(), 
             description: joi.string().min(3).max(30).required(),
