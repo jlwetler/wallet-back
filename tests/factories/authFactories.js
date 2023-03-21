@@ -1,5 +1,5 @@
-import app from '../../src/app';
-import { userBody } from '../utils';
+import app from '../../src/app.js';
+import { userBody } from '../utils.js';
 import supertest from 'supertest';
 
 export async function signUpFactory() {

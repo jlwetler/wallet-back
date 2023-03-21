@@ -2,7 +2,7 @@ import '../src/setup.js';
 import app from '../src/app.js';
 import supertest from 'supertest';
 import { userBody,  cleanDatabase, endConnection } from './utils.js';
-import { signUpFactory, loginFactory } from './factories/authenticationFactories.js'
+import { signUpFactory, loginFactory } from './factories/authFactories.js'
 
 beforeEach(cleanDatabase);
 
@@ -24,5 +24,28 @@ describe("POST /sign-up", () => {
         const response = await signUpFactory();
         
         expect(response.status).toEqual(409);
+    })
+});
+
+
+describe("POST /login", () => {
+    it("should respond with status 400 when email or password data is empty", async () => {
+        const response = await supertest(app).post("/login").send({ email: "", password: "password" });
+
+        expect(response.status).toEqual(400);
+    })
+    it("should respond with status 401 when password is not valid", async () => {
+        await signUpFactory();
+        
+        const body  = userBody;
+
+        const response = await supertest(app).post("/login").send({ email: body.email, password: "incorrectPassword" });
+
+        expect(response.status).toEqual(401);
+    })
+    it("should respond with status 200 when user and password are valid", async () => {
+        const response = await loginFactory();
+        
+        expect(response.status).toEqual(200);
     })
 });
