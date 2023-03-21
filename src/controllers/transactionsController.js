@@ -23,14 +23,14 @@ export async function getTransactions(req, res) {
 
 export async function insertTransaction(req, res) {
     try {
-        const transactionObject = await transactionSchema(req.body);
-
         const authorization = req.header("Authorization");
         
         const userId = await validate(authorization);
-
+        
         if(userId === null) return res.sendStatus(401);
         
+        const transactionObject = await transactionSchema(req.body);
+
         await postTransaction(transactionObject, userId)
 
         res.sendStatus(201);
