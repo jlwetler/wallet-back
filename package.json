@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "start": "set NODE_ENV=prod && npx nodemon src/server.js",
-    "test": "set NODE_ENV=test && npx nodemon src/server.js"
+    "test": "set NODE_ENV=test && npx jest"
   },
   "keywords": [],
   "author": "",
