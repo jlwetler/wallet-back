@@ -51,3 +51,23 @@ describe("GET /transactions", () => {
         expect(response.body).toEqual([transactionWithId]);
     })
 });
+
+describe("DELETE /transactions/:id", () => {
+    it("should respond with status 401 when token is invalid", async () => {
+        const token = "invalid_token";
+
+        const response = await supertest(app).get("/transactions").set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toEqual(401);
+    });
+
+    it("should respond with status 200 when transaction is deleted", async () => {
+        const token = await tokenFactory();
+        
+        await transactionFactory(token);
+
+        const response = await supertest(app).delete("/transactions/1").set('Authorization', `Bearer ${token}`);
+        
+        expect(response.status).toEqual(200);
+    })
+});
