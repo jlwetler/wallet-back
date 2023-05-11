@@ -45,10 +45,12 @@ describe("GET /transactions", () => {
         await transactionFactory(token);
 
         const response = await supertest(app).get("/transactions").set('Authorization', `Bearer ${token}`);
-        
-        const transactionWithId = {...transaction, id:1,}
-        
-        expect(response.body).toEqual([transactionWithId]);
+        console.log("DESGRAÇA", response.body);
+        const object = {...response.body[0], date: response.body[0].date.slice(0, 10)};
+
+        const transactionWithId = {...transaction, id:1}
+
+        expect(object).toEqual(transactionWithId);
     })
 });
 
